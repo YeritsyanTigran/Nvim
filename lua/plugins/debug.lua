@@ -1,6 +1,12 @@
 return {
   'mfussenegger/nvim-dap',
   dependencies = {
+    { 'nvim-neotest/nvim-nio' },
+    'rcarriga/nvim-dap-ui',
+    {
+      'theHamsta/nvim-dap-virtual-text',
+      opts = {},
+    },
     {
       'mason-org/mason.nvim',
       opts = function(_, opts)
@@ -47,38 +53,35 @@ return {
       desc = 'Debug: Toggle Breakpoint',
     },
     {
-      '<leader>B',
-      function()
-        require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-      end,
-      desc = 'Debug: Set Breakpoint',
-    },
-    -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-    {
       '<F7>',
       function()
-        require('dapui').toggle()
+        -- require('dapui').toggle()
       end,
       desc = 'Debug: See last session result.',
     },
   },
   opts = function()
     local dap = require 'dap'
+    print 'Entered'
     if not dap.adapters['pwa-node'] then
       require('dap').adapters['pwa-node'] = {
         type = 'server',
         host = 'localhost',
-        port = '${port}',
+        port = '8090',
         executable = {
           command = 'node',
           -- 💀 Make sure to update this path to point to your installation
           args = {
             '~/.local/share/nvim/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js',
-            '${port}',
+            '8090',
           },
         },
       }
     end
+    vim.keymap.set('n', '<leader>B', function()
+      require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
+    end)
+
     if not dap.adapters['node'] then
       dap.adapters['node'] = function(cb, config)
         if config.type == 'node' then
