@@ -1,13 +1,16 @@
 return {
   'mfussenegger/nvim-dap',
   dependencies = {
-    'rcarriga/nvim-dap-ui',
-    'nvim-neotest/nvim-nio',
-    'mason-org/mason.nvim',
-    'jay-babu/mason-nvim-dap.nvim',
-    'leoluz/nvim-dap-go',
+    {
+      'mason-org/mason.nvim',
+      opts = function(_, opts)
+        opts.ensure_installed = opts.ensure_installed or {}
+        table.insert(opts.ensure_installed, 'js-debug-adapter')
+      end,
+    },
   },
   keys = {
+    -- Basic debugging keymaps, feel free to change to your liking!
     {
       '<F5>',
       function()
@@ -59,41 +62,62 @@ return {
       desc = 'Debug: See last session result.',
     },
   },
-  config = function()
+  opts = function()
     local dap = require 'dap'
-    local dapui = require 'dapui'
-
-    require('mason-nvim-dap').setup {
-      automatic_installation = true,
-      handlers = {},
-      ensure_installed = {
-        'delve',
-        'js',
-      },
-    }
-    dapui.setup {
-      icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
-      controls = {
-        icons = {
-          pause = '⏸',
-          play = '▶',
-          step_into = '⏎',
-          step_over = '⏭',
-          step_out = '⏮',
-          step_back = 'b',
-          run_last = '▶▶',
-          terminate = '⏹',
-          disconnect = '⏏',
+    if not dap.adapters['pwa-node'] then
+      require('dap').adapters['pwa-node'] = {
+        type = 'server',
+        host = 'localhost',
+        port = '${port}',
+        executable = {
+          command = 'node',
+          -- 💀 Make sure to update this path to point to your installation
+          args = {
+            '~/.local/share/nvim/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js',
+            '${port}',
+          },
         },
-      },
-    }
-    dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-    dap.listeners.before.event_terminated['dapui_config'] = dapui.close
-    dap.listeners.before.event_exited['dapui_config'] = dapui.close
-    require('dap-go').setup {
-      delve = {
-        detached = vim.fn.has 'win32' == 0,
-      },
-    }
+      }
+    end
+    if not dap.adapters['node'] then
+      dap.adapters['node'] = function(cb, config)
+        if config.type == 'node' then
+          config.type = 'pwa-node'
+        end
+        local nativeAdapter = dap.adapters['pwa-node']
+        if type(nativeAdapter) == 'function' then
+          nativeAdapter(cb, config)
+        else
+          cb(nativeAdapter)
+        end
+      end
+    end
+
+    local js_filetypes = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' }
+
+    local vscode = require 'dap.ext.vscode'
+    vscode.type_to_filetypes['node'] = js_filetypes
+    vscode.type_to_filetypes['pwa-node'] = js_filetypes
+
+    for _, language in ipairs(js_filetypes) do
+      if not dap.configurations[language] then
+        dap.configurations[language] = {
+          {
+            type = 'pwa-node',
+            request = 'launch',
+            name = 'Launch file',
+            program = '${file}',
+            cwd = '${workspaceFolder}',
+          },
+          {
+            type = 'pwa-node',
+            request = 'attach',
+            name = 'Attach',
+            processId = require('dap.utils').pick_process,
+            cwd = '${workspaceFolder}',
+          },
+        }
+      end
+    end
   end,
 }

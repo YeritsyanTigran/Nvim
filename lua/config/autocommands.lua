@@ -13,7 +13,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(event)
     local map = function(keys, func, desc, mode)
       mode = mode or 'n'
-      print(keys)
       vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
     end
     map('grn', vim.lsp.buf.rename, '[R]e[n]ame')

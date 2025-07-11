@@ -6,7 +6,16 @@ return {
     -- or a list of adapter names,
     -- or a table of adapter names, mapped to adapter configs.
     -- The adapter will then be automatically loaded with the config.
-    adapters = { 'neotest-jest' },
+    adapters = {
+      ['neotest-jest'] = {
+        jestCommand = 'npm jest --',
+        jestConfigFile = 'custom.jest.config.ts',
+        env = { CI = true },
+        cwd = function()
+          return vim.fn.getcwd()
+        end,
+      },
+    },
     -- Example for loading neotest-golang with a custom config
     -- adapters = {
     --   ["neotest-golang"] = {
@@ -72,5 +81,5 @@ return {
     { "<leader>tO", function() require("neotest").output_panel.toggle() end, desc = "Toggle Output Panel (Neotest)" },
     { "<leader>tS", function() require("neotest").run.stop() end, desc = "Stop (Neotest)" },
     { "<leader>tw", function() require("neotest").watch.toggle(vim.fn.expand("%")) end, desc = "Toggle Watch (Neotest)" },
-  },
+      },
 }
