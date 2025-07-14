@@ -7,14 +7,7 @@ return {
     -- or a table of adapter names, mapped to adapter configs.
     -- The adapter will then be automatically loaded with the config.
     adapters = {
-      ['neotest-jest'] = {
-        jestCommand = 'npm jest --',
-        jestConfigFile = 'custom.jest.config.ts',
-        env = { CI = true },
-        cwd = function()
-          return vim.fn.getcwd()
-        end,
-      },
+      ['neotest-jest'] = {},
     },
     -- Example for loading neotest-golang with a custom config
     -- adapters = {
