@@ -23,13 +23,6 @@ return {
     config = function()
       local capabilities = require('blink.cmp').get_lsp_capabilities()
       local servers = {
-        ts_ls = {
-          preferences = {
-            includeCompletionsForModuleExports = true,
-            includeCompletionsForImportStatements = true,
-            importModuleSpecifierPreference = 'relative',
-          },
-        },
         lua_ls = {
           settings = {
             Lua = {
