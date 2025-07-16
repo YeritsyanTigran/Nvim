@@ -1,6 +1,6 @@
 return {
   'nvim-neotest/neotest',
-  dependencies = { 'nvim-neotest/nvim-nio', 'nvim-neotest/neotest-jest' },
+  dependencies = { 'nvim-neotest/nvim-nio', 'nvim-neotest/neotest-jest', 'adrigzr/neotest-mocha' },
   opts = {
     -- Can be a list of adapters like what neotest expects,
     -- or a list of adapter names,
@@ -8,6 +8,7 @@ return {
     -- The adapter will then be automatically loaded with the config.
     adapters = {
       ['neotest-jest'] = {},
+      ['neotest-mocha'] = {},
     },
     -- Example for loading neotest-golang with a custom config
     -- adapters = {
